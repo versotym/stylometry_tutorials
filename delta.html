@@ -1,0 +1,369 @@
+<html>
+
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" href="css/style.css" type="text/css" />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/highcharts-3d.js"></script>
+	<script src="https://code.highcharts.com/highcharts-more.js"></script>
+	<script src="https://code.highcharts.com/modules/exporting.js"></script>
+</head>
+
+<body>
+<center>
+
+<h1>Burrows' Delta</h1>
+
+<div id='authorsList' style="display:inline-block; width: 200px;vertical-align: top">
+<br><span style="color: black; border-bottom: 1px solid black; border-top: 1px solid black">PARADISE LOST</span>
+<br><span id='miltonTrigger'>John Milton</span>
+<br>William Congreve
+<br>Matthew Prior
+<br>Abraham Cowley
+<br>Nahum Tate
+<br>John Denham
+<br>Andrew Marvell
+<br>John Oldham
+<br>John Dryden
+<br>Thomas D'Urfey
+<br>Elkanah Settle
+<br>Thomas Shadwell
+<br>Jonathan Swift
+<br>Samuel Butler
+<br>Anne Wharton
+<br>Edmund Waller
+<br>Charles Cotton
+<br><span id='behnTrigger'>Aphra Behn</span>
+<br>Robert Gould
+<br>Charles Sedley
+<br>Charles Sackville
+<br>Alexander Radcliffe
+<br>Alexander Brome
+<br>John Wilmot
+<br>Katherine Phillips
+</div>
+
+<div id="container" style="height: 400px; height: 600px; min-width: 500px; max-width: 500px; margin: 0 auto; display: inline-block; vertical-align: top; padding-top: 20px">
+</div>
+
+</center>
+
+<script>
+var milton = {						
+		name: "Milton", 
+		id: "milton",
+		marker: {enabled: false},
+		color: Highcharts.getOptions().colors[3],
+		dashStyle: 'longdash',
+		data: [2.809, 3.298, 2.561, 1.094, 1.824, 1.552, 1.009, 1.436, 1.428, 0.442, 0.916, 0.435, 0.830, 1.676, 0.450, 0.722, 0.761, 0.287, 1.180, 0.520],
+}
+
+var behn = {
+		name: "Behn", 
+		id: "behn",
+		marker: {enabled: false},
+		color: Highcharts.getOptions().colors[0],
+		dashStyle: 'shortdash',
+
+		data: [4.202, 3.925, 1.783, 1.479, 1.331, 1.120, 0.912, 0.944, 0.986, 0.797, 0.797, 0.792, 1.179, 1.382, 0.733, 0.673, 0.355, 0.299, 0.539, 0.617],
+}
+
+var distMiltonVals = [];
+var distBehnVals = [];
+var distMiltonConnect = [];
+var distBehnConnect = [];
+var distMiltonStack = 0;
+var distBehnStack = 0;
+
+var miltonPoints = [2.809, 3.298, 2.561, 1.094, 1.824, 1.552, 1.009, 1.436, 1.428, 0.442, 0.916, 0.435, 0.830, 1.676, 0.450, 0.722, 0.761, 0.287, 1.180, 0.520];
+var paradisePoints = [4.091, 4.165, 2.769, 0.696, 1.289, 1.720, 1.532, 1.484, 1.245, 0.239, 0.696, 0.703, 0.836, 0.700, 0.151, 0.737, 0.795, 0.435, 0.847, 0.401];
+var behnPoints = [4.202, 3.925, 1.783, 1.479, 1.331, 1.120, 0.912, 0.944, 0.986, 0.797, 0.797, 0.792, 1.179, 1.382, 0.733, 0.673, 0.355, 0.299, 0.539, 0.617];
+
+var miltonZ = [-2.274, -0.940, 2.353, -1.177, 1.491, 1.028, -0.448, 1.991, 3.161, -1.588, -0.038, -1.529, 0.254, 2.326, -1.322, 0.053, 0.506, -0.998, 3.231, -0.397 ];
+var paradiseZ = [-0.239, 0.798, 3.015, -2.103, -0.480, 1.916, 1.171, 2.224, 1.761, -2.238, -1.167, -0.413, 0.283, -0.171, -2.575, 0.119, 0.653, -0.560, 1.324, -1.109];
+var behnZ = [-0.064, 0.311, -0.121, -0.283, -0.323, -1.264, -0.747, -0.371, -0.217, -0.452, -0.648, -0.043, 2.063, 1.574, -0.138, -0.167, -1.206, -0.961, -0.441, 0.188];
+
+
+for (i = 0; i < paradisePoints.length; i++){
+	var valMilton = Math.abs(paradiseZ[i] - miltonZ[i]); 
+	var valBehn = Math.abs(paradiseZ[i] - behnZ[i]);
+	distMiltonVals.push([0, valMilton, valMilton, valMilton, valMilton]);
+	distBehnVals.push([0, valBehn, valBehn, valBehn, valBehn]);
+	distMiltonConnect.push([paradiseZ[i], miltonZ[i], miltonZ[i], miltonZ[i], miltonZ[i]]);
+	distBehnConnect.push([paradiseZ[i], behnZ[i], behnZ[i], behnZ[i], behnZ[i]]);
+	distMiltonStack += valMilton/paradiseZ.length;
+	distBehnStack += valBehn/paradiseZ.length;
+}
+
+console.log(distMiltonStack, distBehnStack)
+
+var distMilton = {
+		name: 'miltonBox',
+		id: 'miltonBox',
+		type: "boxplot",
+		whiskerLength: '100%',
+		grouping: true,
+		lineWidth: 2,
+		color: "#b96500", //Highcharts.getOptions().colors[3],
+		data: distMiltonConnect,
+		lineWidth: 4
+}
+
+var distBehn = {
+		name: 'behnBox',
+		id: 'behnBox',
+		type: "boxplot",
+		whiskerLength: '100%',
+		grouping: true,
+		lineWidth: 2,
+		color: "#191970", //Highcharts.getOptions().colors[0],
+		data: distBehnConnect,
+		lineWidth: 4
+}
+
+function renderChart1(){
+	chart1 = new Highcharts.Chart({
+		  exporting:{enabled: false},
+   		  tooltip: {enabled: false},
+		  credits:{enabled: false},
+			chart: { type: 'line', renderTo: "container" },
+			title: { text: 'Most frequent words' },
+			legend: { enabled: false },
+			xAxis: { categories: 
+				['the' , 'and', 'of', 'a', 'to(i)', 'in(p)', 'his', 'with', 'to(p)', 'is', 'but', 'he', 'all', 'I', 'it', 'as', 'their', 'her', 'not', 'be', '# MEAN #'],	
+				labels: {rotation: -90}, title: { text: '' }, min: 0 },
+			yAxis: { title: { text: '<i>f</i>(%)' },  min: null, max: null, gridLineWidth: 0},
+			series: [
+
+			{
+			name: "PARADISE LOST", 
+			marker: {enabled: false},
+			color: Highcharts.getOptions().colors[1],
+			data: [4.091, 4.165, 2.769, 0.696, 1.289, 1.720, 1.532, 1.484, 1.245, 0.239, 0.696, 0.703, 0.836, 0.700, 0.151, 0.737, 0.795, 0.435, 0.847, 0.401],
+		 	}				
+		   ]
+	
+	});
+}
+
+
+function renderChart2(){
+
+$(function () {
+    $('#container').highcharts({
+      credits:{enabled: false},
+		plotOptions: {
+				column: {
+				    dataLabels: {
+						rotation: 270,
+				        enabled: true,
+				        crop: false,
+				        overflow: 'none',
+						style: {"fontWeight": "regular", "fontSize": "9px"}
+				    }
+				}
+			},
+	    chart: { type: 'column' },
+        exporting:{enabled: false},
+	    title: { text: 'DELTA-scores for all candidate authors' },
+	    legend: { enabled: false },
+	    xAxis: { categories: 
+			["Milton","Congreve","Prior","Cowley","Tate","Denham","Marvell","Oldham","Dryden","D'Urfey","Settle","Shadwell","Swift","Butler","Wharton","Waller","Cotton","Behn","Gould","Sedley","Sackville","Radcliffe","Brome","Wilmot","Phillips"],	
+			labels: {rotation: -90}, title: { text: '' }, min: 0 },
+	    yAxis: { title: { text: 'delta-scores' },  min: null, max: null, gridLineWidth: 0},
+	    series: [
+
+		{
+		name: "", 
+		data: [
+		1.023, 1.242, 1.258, 1.316, 1.330, 1.344, 1.367, 1.389, 1.393, 1.393, 1.412, 1.433, 1.461, 1.502, 1.513, 1.523, 1.565, 1.568, 1.575, 1.589, 1.663, 1.673, 1.688, 1.697, 1.828
+	],
+	 	}				
+
+
+       ]
+	
+	});
+});
+}
+
+var intro = "<b>model situation:</b><p>We don't know who wrote the text of<br> »Paradise Lost«, but we have a strong evidence<br> that one of these 25 authors did it.<p> The question is - of course - which one.<p>Burrows' Delta aims to give an answer in following way: grab <i>n</i> words that are most frequent in entire collection (Paradise Lost + texts of candidates) and then compare the frequencies of these words in candidate texts to those found in Paradise Lost.";
+
+function showChart1(){
+	$('#authorsList').css('color', '#EDEBEC');
+	renderChart1();	
+}
+function hideChart1(){
+	$('#authorsList').css('color', 'black');
+	chart1.destroy();
+	$('#container').html(intro);	
+}
+
+function showMilton1() {
+	chart1.addSeries(milton);
+	$('#miltonTrigger').css('color', 'orange');
+}
+function hideMilton1() {
+	chart1.get('milton').remove();
+	$('#miltonTrigger').css('color', 'black');
+}
+
+function showMilton2() {
+	chart1.addSeries(distMilton);
+	chart1.setTitle({text: 'For each candidate text calculate the distances between its individual values and the ones of Paradise Lost'});
+	chart1.series[0].update({color: "rgba(13,35,58, 0.4)"});
+	chart1.series[2].update({color: "rgba(47,126,216, 0.4)"});
+	chart1.series[1].update({color: "rgba(242,143,67, 0.4)"});
+}
+function hideMilton2() {
+	chart1.get("miltonBox").remove();
+	chart1.setTitle({text: 'Z-scores transformation'});
+	chart1.series[0].update({color: "rgba(13,35,58, 1)"});
+	chart1.series[2].update({color: "rgba(47,126,216, 1)"});
+	chart1.series[1].update({color: "rgba(242,143,67, 1)"});
+}
+
+function showMilton3() {
+	chart1.get('miltonBox').addPoint([0, distMiltonStack, distMiltonStack, distMiltonStack, distMiltonStack]);
+	chart1.setTitle({text: 'For each candidate count the mean distance = DELTA-score'});
+}
+function hideMilton3() {
+	chart1.get('miltonBox').data[chart1.get('miltonBox').data.length-1].remove();
+	chart1.setTitle({text: 'For each candidate text calculate the distances between its individual values and the ones of Paradise Lost'});
+}
+
+function showBehn1() {
+	chart1.addSeries(behn);
+		$('#behnTrigger').css('color', 'blue');
+}
+function hideBehn1() {
+	chart1.get('behn').remove();
+	$('#behnTrigger').css('color', 'black');
+}
+
+function showBehn2() {
+	chart1.addSeries(distBehn);
+}
+function hideBehn2() {
+	chart1.get("behnBox").remove();
+}
+
+function slideDistDown(){
+	chart1.get("miltonBox").update({data:distMiltonVals});
+	chart1.get("behnBox").update({data:distBehnVals});
+	chart1.series[0].update({color: "rgba(13,35,58, 0.1)"});
+	chart1.series[2].update({color: "rgba(47,126,216, 0.1)"});
+	chart1.series[1].update({color: "rgba(242,143,67, 0.1)"});
+
+}
+function slideDistUp(){
+	chart1.get("miltonBox").update({data:distMiltonConnect});
+	chart1.get("behnBox").update({data:distBehnConnect});
+	chart1.series[0].update({color: "rgba(13,35,58, 0.4)"});
+	chart1.series[2].update({color: "rgba(47,126,216, 0.4)"});
+	chart1.series[1].update({color: "rgba(242,143,67, 0.4)"});
+
+}
+
+function showBehn3() {
+	chart1.get('behnBox').addPoint([0, distBehnStack, distBehnStack, distBehnStack, distBehnStack]);
+}
+function hideBehn3() {
+	chart1.get('behnBox').data[chart1.get('behnBox').data.length-1].remove();
+}
+
+function showZ() {
+	chart1.series[0].setData(paradiseZ);
+	chart1.series[1].setData(miltonZ);
+	chart1.series[2].setData(behnZ);
+	chart1.setTitle({text: 'Z-scores transformation'});
+}
+function hideZ() {
+	chart1.series[0].setData(paradisePoints);
+	chart1.series[1].setData(miltonPoints);
+	chart1.series[2].setData(behnPoints);
+	chart1.setTitle({text: 'Most frequent words'});
+}
+
+function showChart2() {
+	chart1.destroy();
+	renderChart2();	
+	$('#authorsList').css('color', 'black');
+	$('#miltonTrigger').css('color', 'black');
+	$('#behnTrigger').css('color', 'black');
+}
+function hideChart2() {
+	showChart1();
+	showMilton1();
+	showBehn1();
+	showZ();
+	showMilton2();
+	showBehn2();
+	slideDistDown();
+	
+	//showMilton3();
+	//showBehn3();
+	chart1.setTitle({text: 'For each candidate text sum up all the distances = DELTA measure'});
+}
+
+function empty_first() {
+	slides_i++;
+}
+function empty_last() {
+	slides_i--;
+}
+
+var slides1 = [
+	empty_first,
+	showChart1,
+	showMilton1,
+	showBehn1,
+	showZ,
+	showMilton2,
+	showBehn2,
+	slideDistDown,
+	showMilton3,
+	showBehn3,
+	showChart2,
+	empty_last,
+]
+var slides2 = [
+	empty_first,
+	hideChart1,
+	hideMilton1,
+	hideBehn1,
+	hideZ,
+	hideMilton2,
+	hideBehn2,
+	slideDistUp,
+	hideMilton3,
+	hideBehn3,
+	hideChart2,
+	empty_last,
+]
+var slide_i = 1;
+$( "#backward_arrow" ).click(function() { navigator(37); });
+$( "#forward_arrow" ).click(function() { navigator(39); });
+$('#container').html(intro);
+
+$(document).keydown(function(e){
+	navigator(e.keyCode);
+});
+
+function navigator(code){
+	if ( code == 39 ) { 
+		slides1[slide_i]();
+		slide_i++;         
+	} else if ( code == 37 ) { 
+		slides2[slide_i-1]();
+		slide_i--;         
+	}
+}
+
+
+</script>
+
+</body>
+</html>
+
